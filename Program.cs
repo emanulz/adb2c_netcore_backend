@@ -7,16 +7,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Enable CORS
 
-IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+IConfiguration configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .AddEnvironmentVariables()
+    .Build();
 
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy
-            .WithOrigins(configuration.GetValue<string>("Origins"))
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        List<CorsOrigin> origins = new List<CorsOrigin>();
+        configuration.GetSection("cors:origins").Bind(origins);
+        foreach (var o in origins)
+        {
+            policy.WithOrigins(o.uri);
+        }
+        policy.AllowAnyHeader().AllowAnyMethod();
     });
 });
 
@@ -26,17 +32,23 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<DocumentContext>(opt => opt.UseInMemoryDatabase("DocumentList"));
 
+// Adds Microsoft Identity platform (Azure AD B2C) support to protect this Api
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(configuration.GetSection("AzureAdB2C"));
+    .AddMicrosoftIdentityWebApi(
+        options =>
+        {
+            configuration.Bind("AzureAdB2C", options);
+            options.TokenValidationParameters.NameClaimType = "name";
+        },
+        options =>
+        {
+            configuration.Bind("AzureAdB2C", options);
+        }
+    );
 
-builder.Services.Configure<JwtBearerOptions>(
-    JwtBearerDefaults.AuthenticationScheme,
-    options =>
-    {
-        options.TokenValidationParameters.NameClaimType = "name";
-    }
-);
+// End of the Microsoft Identity platform block
+
 builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

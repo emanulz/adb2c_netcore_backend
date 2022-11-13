@@ -1,0 +1,24 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "AzureAdB2C": {
+    "Instance": "",
+    "ClientId": "",
+    "Domain": "",
+    "SignUpSignInPolicyId": ""
+  }, 
+  "cors": {
+    "enabled": true,
+    "allowAnyOrigin": false,
+    "origins": [
+      { "uri": ""},
+      { "uri": ""}
+    ]
+  }
+}
+
