@@ -7,10 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Enable CORS
 
-IConfiguration configuration = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json")
-    .AddEnvironmentVariables()
-    .Build();
+IConfiguration configuration = new ConfigurationBuilder().AddEnvironmentVariables().Build();
 
 builder.Services.AddCors(options =>
 {
